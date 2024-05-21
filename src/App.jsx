@@ -2,18 +2,23 @@ import { useEffect, useState } from 'react';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 import './App.css';
-// import Trenitalia from 'api-trenitalia';
-// import moment from 'moment';
-
-
 
 function App() {
-  // const t = new Trenitalia();
-
+  const [stations, setStations] = useState([]);
   const [originStation, setOriginStation] = useState('');
   const [destinationStation, setDestinationStation] = useState('');
 
   let $ = [];
+
+  const getRFI = async (stationId) => {
+    const response = await axios.get('/rfi', {
+      headers: {}
+    });
+
+    console.log(response.data);
+  };
+
+  getRFI(1852);
 
   const getStationsId = async () => {
     const response = await axios.get('/monitor', {
@@ -25,23 +30,33 @@ function App() {
     // Use Cheerio to parse the HTML
     $ = cheerio.load(html);
     // get all options with value attribute
-    const $option = $('option[value]');
-    console.log('🚂 stations', $option);
+
+    const stations = $('select > option').map((i, el) => {
+      return {
+        id: $(el).attr('value'),
+        name: $(el).text()
+      };
+    }).toArray();
+
+    setStations(stations);
   };
 
-  getStationsId();
+  // getStationsId();
 
-  // using npm package api-trenitalia
-  // not working
-  // useEffect(() => {
-  //   const getStationsName = async (station) => {
-  //     const stations = await t.autocomplete(station);
-  //     console.log('🚂 stations', stations);
-  //   };
+  useEffect(() => {
+    if (!stations.length) return;
 
-  //   const stations_from = getStationsName(originStation);
-  //   console.log('🚂 stations_FROM', stations_from);
-  // }, [originStation]);
+    console.log(`🚂 ${originStation}:`);
+    console.log(stations.filter(station => station.name.includes(originStation.toUpperCase())));
+  }, [originStation]);
+
+  useEffect(() => {
+    if (!stations.length) return;
+
+    console.log(`🚂 ${destinationStation}:`)
+    console.log(stations.filter(station => station.name.includes(destinationStation.toUpperCase())));
+  }, [destinationStation]);
+
 
   return (
     <>
