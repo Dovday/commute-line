@@ -53,7 +53,7 @@ function App() {
     return array.map((el) => el.replace(/\n/g, '').trim());
   };
 
-  const getRFI = async (stationId) => {
+  const getRFI = async (stationId, destination = 'TRENTO') => {
     const response = await axios.get('/rfi', {
       headers: {},
     });
@@ -85,16 +85,25 @@ function App() {
       return $(el).attr('aria-label');
     }).toArray();
 
+    let moreInfo = $('.FermateSuccessivePopupStyle > .testoinfoaggiuntive').map((i, el) => {
+      return $(el).text();
+    }).toArray();
+
     numbers = cleanArray(numbers);
     plannedTimes = cleanArray(plannedTimes);
     delays = cleanArray(delays);
     platforms = cleanArray(platforms);
     blinking = cleanArray(blinking);
+    moreInfo = cleanArray(moreInfo);
 
     // push each train data like an object to the array
     const trains = [];
     for (let i = 0; i < numbers.length; i++) {
       if (numbers[i] === '') continue;
+
+      // filter only the trains that go to the destination
+      if (moreInfo[i] == null || !moreInfo[i].includes(`- ${destination} (`)) continue;
+
       trains.push({
         number: numbers[i],
         plannedTime: plannedTimes[i],
@@ -102,7 +111,8 @@ function App() {
         realTime: delays[i] === '0' ? plannedTimes[i] : moment(plannedTimes[i], 'HH:mm').add(delays[i], 'minutes').format('HH:mm'),
         delay: delays[i],
         platform: platforms[i],
-        blinking: blinking[i]
+        blinking: !blinking[i].includes('No'),
+        nextStops: moreInfo[i]
       });
     }
     console.log(trains);

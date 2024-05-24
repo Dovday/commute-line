@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/rfi': {
-        target: 'https://iechub.rfi.it/ArriviPartenze/ArrivalsDepartures/Monitor?arrivals=True&placeId=1852',
+        target: 'https://iechub.rfi.it/ArriviPartenze/ArrivalsDepartures/Monitor?arrivals=False&placeId=1852',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/rfi/, ''),
       },
