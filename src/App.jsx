@@ -2,14 +2,22 @@ import { useEffect, useState } from 'react';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 import moment from 'moment';
+import { AutoComplete, Input } from 'antd';
 import './App.css';
 
+// UTILS - start
 const initStation = () => {
   return {
     'id': null,
     'name': null
   };
 };
+
+const cleanArray = (array) => {
+  // remove all new lines and white string in the elements and remove empty elements
+  return array.map((el) => el.replace(/\n/g, '').trim());
+};
+// UTILS - end
 
 function App() {
   const [stations, setStations] = useState([]);
@@ -20,11 +28,7 @@ function App() {
   const [origin, setOrigin] = useState(initStation());
   const [destination, setDestination] = useState(initStation());
 
-  const [originMatchedStations, setOriginMatchedStations] = useState([]);
-  const [destinationMatchedStations, setDestinationMatchedStations] = useState([]);
-
-  // 1) CHEERIO
-  // 1) start
+  // CHEERIO - start
   const getStationsId = async () => {
     const response = await axios.get('/stations', {
       headers: {}
@@ -46,15 +50,8 @@ function App() {
     setStations(stations);
   };
 
-  // getStationsId();
-
-  const cleanArray = (array) => {
-    // remove all new lines and white string in the elements and remove empty elements
-    return array.map((el) => el.replace(/\n/g, '').trim());
-  };
-
-  const getRFI = async (stationId, destination = 'TRENTO') => {
-    const response = await axios.get('/rfi', {
+  const getRFI = async (stationId, destination) => {
+    const response = await axios.get(`/rfi/${stationId}`, {
       headers: {},
     });
 
@@ -118,96 +115,78 @@ function App() {
     console.log(trains);
   };
 
-  getRFI(1852);
+  getStationsId(); // output: stations
+  // CHEERIO - end
 
-  // 1) end
+  // setting origin and destination stations based on inputs (adding id)
+  useEffect(() => {
+    if (!stations.length) return;
 
-  // const getMatchedStations = (input) => {
-  //   const matchedStations = stations.filter(station => station.name.includes(input.toUpperCase()));
+    const originStation = stations.filter((station) => station.name === inputOrigin);
 
-  //   // sort by name length
-  //   matchedStations.sort((a, b) => a.name.length - b.name.length);
+    if (originStation.length === 0) return;
+    setOrigin(originStation[0]);
+  }, [inputOrigin]);
+  useEffect(() => {
+    if (!stations.length) return;
 
-  //   // limit to 3 only if there are more than 3
-  //   matchedStations.length = matchedStations.length > 3 ? 3 : matchedStations.length;
+    const destinationStation = stations.filter((station) => station.name === inputDestination);
 
-  //   return matchedStations;
-  // };
+    if (destinationStation.length === 0) return;
+    setDestination(destinationStation[0]);
+  }, [inputDestination]);
 
-  // useEffect(() => {
-  //   if (!stations.length) return;
+  useEffect(() => {
+    if (origin.id == null || destination.id == null) return;
+    console.log('🚨 Origin and destination are set and not null');
 
-  //   console.log(getMatchedStations(inputOrigin));
+    if (origin.id === destination.id) {
+      console.log('🚨 Origin and destination are the same');
+      return;
+    }
+    console.log(`FROM ${origin.name} TO ${destination.name}`);
+    getRFI(origin.id, destination.name);
 
-  //   setOriginMatchedStations(getMatchedStations(inputOrigin));
-
-  //   // has to be the one user selectes
-  //   // setOrigin({...origin, 'rfi': getMatchedStations(inputOrigin)[0]});
-  // }, [inputOrigin]);
-
-  // useEffect(() => {
-  //   if (!stations.length) return;
-
-  //   console.log(`🚂 ${inputDestination}:`);
-
-  //   setDestinationMatchedStations(getMatchedStations(inputDestination));
-
-  //   // has to be the one user selectes
-  //   // setOrigin({...origin, 'rfi': getMatchedStations(inputOrigin)[0]});
-  // }, [inputDestination]);
-
-  // const renderStationOptions = (station) => {
-  //   if (station === 'origin') {
-  //     return (<>{(inputOrigin && originMatchedStations.length > 0 && origin.rfi.id == null) && (
-  //       <select
-  //         value={origin.rfi.id != null ? origin.rfi.name : ''}
-  //         onChange={(e) => setOrigin({ ...origin, 'rfi': JSON.parse(e.target.value) })}
-  //       >
-  //         {originMatchedStations.map((station) => {
-  //           return (
-  //             <option key={station.id} value={`${JSON.stringify(station)}`}>
-  //               {station.name}
-  //             </option>
-  //           );
-  //         })}
-  //       </select>
-  //     )}</>);
-  //   } else {
-  //     // destination
-  //     return (<>{(inputDestination && destinationMatchedStations.length > 0 && destination.rfi.id == null) && (
-  //       <select
-  //         value={destination.rfi.id != null ? destination.rfi.name : ''}
-  //         onChange={(e) => setDestination({ ...destination, 'rfi': JSON.parse(e.target.value) })}
-  //       >
-  //         {destinationMatchedStations.map((station) => {
-  //           return (
-  //             <option key={station.id} value={`${JSON.stringify(station)}`}>
-  //               {station.name}
-  //             </option>
-  //           );
-  //         })}
-  //       </select>
-  //     )}</>);
-  //   }
-  // };
+    console.log(`FROM ${destination.name} TO ${origin.name}`);
+    getRFI(destination.id, origin.name);
+  }, [origin, destination]);
 
   return (
     <>
       <div>
-        <h1>Commutrain</h1>
-        <form>
-          <label>
-            Origin Station:
-            {/* <input type="text" value={origin.rfi.id != null ? origin.rfi.name : inputOrigin} onChange={e => setInputOrigin(e.target.value)} /> */}
-          </label>
-          {/* {renderStationOptions('origin')}
-          <label>
-            Destination Station:
-            <input type="text" value={inputDestination} onChange={e => setInputDestination(e.target.value)} />
-          </label>
-          {renderStationOptions('destination')}
-          <button type="submit">Get Train Times</button> */}
-        </form>
+        <h1></h1>
+        <div>
+          <div>
+            <AutoComplete
+              popupClassName="certain-category-search-dropdown"
+              popupMatchSelectWidth={350}
+              style={{
+                width: 250,
+              }}
+              onChange={(value) => setInputOrigin(value)}
+              filterOption
+              options={stations.map(station => ({ value: station.name }))}
+              size="large"
+            >
+              <Input.Search size="large" placeholder="Origin station" />
+            </AutoComplete>
+          </div>
+          <div>
+            <AutoComplete
+              popupClassName="certain-category-search-dropdown"
+              popupMatchSelectWidth={350}
+              style={{
+                width: 250,
+              }}
+              onChange={(value) => setInputDestination(value)}
+              filterOption
+              options={stations.map(station => ({ value: station.name }))}
+              size="large"
+            >
+              <Input.Search size="large" placeholder="Destination station" />
+            </AutoComplete>
+          </div>
+        </div>
       </div >
     </>
   )
