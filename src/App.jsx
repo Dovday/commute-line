@@ -28,6 +28,10 @@ function App() {
   const [origin, setOrigin] = useState(initStation());
   const [destination, setDestination] = useState(initStation());
 
+  // states for train solutions from origin to destination and viceversa
+  const [origin2destination, setOrigin2destination] = useState([]);
+  const [destination2origin, setDestination2origin] = useState([]);
+
   // CHEERIO - start
   const getStationsId = async () => {
     const response = await axios.get('/stations', {
@@ -112,43 +116,57 @@ function App() {
         nextStops: moreInfo[i]
       });
     }
-    console.log(trains);
+    return trains;
   };
 
   getStationsId(); // output: stations
   // CHEERIO - end
 
+  useEffect(() => {
+    const savedOrigin = localStorage.getItem('origin');
+    const savedDestination = localStorage.getItem('destination');
+
+    console.log(`💾 ${savedOrigin}, ${savedDestination}`);
+
+    if (savedOrigin != null && savedDestination != null) {
+      setOrigin(JSON.parse(savedOrigin));
+      setDestination(JSON.parse(savedDestination));
+    }
+  }, []);
+
+  const getTrainSolutions = async () => {
+    setOrigin2destination(await getRFI(origin.id, destination.name));
+    setDestination2origin(await getRFI(destination.id, origin.name));
+  };
+
   // setting origin and destination stations based on inputs (adding id)
   useEffect(() => {
     if (!stations.length) return;
 
-    const originStation = stations.filter((station) => station.name === inputOrigin);
+    const originStation = stations.find((station) => station.name === inputOrigin);
 
-    if (originStation.length === 0) return;
-    setOrigin(originStation[0]);
+    if (originStation == null) return;
+
+    localStorage.setItem('origin', JSON.stringify(originStation));
+    setOrigin(originStation);
   }, [inputOrigin]);
   useEffect(() => {
     if (!stations.length) return;
 
-    const destinationStation = stations.filter((station) => station.name === inputDestination);
+    const destinationStation = stations.find((station) => station.name === inputDestination);
 
-    if (destinationStation.length === 0) return;
-    setDestination(destinationStation[0]);
+    if (destinationStation == null) return;
+
+    localStorage.setItem('destination', JSON.stringify(destinationStation));
+    setDestination(destinationStation);
   }, [inputDestination]);
 
   useEffect(() => {
     if (origin.id == null || destination.id == null) return;
-    console.log('🚨 Origin and destination are set and not null');
 
-    if (origin.id === destination.id) {
-      console.log('🚨 Origin and destination are the same');
-      return;
-    }
-    console.log(`FROM ${origin.name} TO ${destination.name}`);
-    getRFI(origin.id, destination.name);
+    if (origin.id === destination.id) return;
 
-    console.log(`FROM ${destination.name} TO ${origin.name}`);
-    getRFI(destination.id, origin.name);
+    getTrainSolutions();
   }, [origin, destination]);
 
   return (
@@ -168,8 +186,15 @@ function App() {
               options={stations.map(station => ({ value: station.name }))}
               size="large"
             >
-              <Input.Search size="large" placeholder="Origin station" />
+              <Input.Search size="large" placeholder={origin.id != null ? origin.name : "Origin station"} />
             </AutoComplete>
+            {origin2destination.length > 0 && (
+              origin2destination.map(train => (
+                <div key={train.id}>
+                  {`${train.number}: ${train.plannedTime} ${train.delay ?? ''} @ ${train.platform}`}
+                </div>
+              ))
+            )}
           </div>
           <div>
             <AutoComplete
@@ -183,8 +208,15 @@ function App() {
               options={stations.map(station => ({ value: station.name }))}
               size="large"
             >
-              <Input.Search size="large" placeholder="Destination station" />
+              <Input.Search size="large" placeholder={destination.id != null ? destination.name : "Destination station"} />
             </AutoComplete>
+            {destination2origin.length > 0 && (
+              destination2origin.map(train => (
+                <div key={train.id}>
+                  {`${train.number}: ${train.plannedTime} ${train.delay ?? ''} @ ${train.platform}`}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div >
