@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio';
 import axios from 'axios';
 import moment from 'moment';
 import { AutoComplete, Input } from 'antd';
+import TrainStatus from './components/TrainStatus';
 import './App.css';
 
 // UTILS - start
@@ -32,6 +33,10 @@ function App() {
   const [origin2destination, setOrigin2destination] = useState([]);
   const [destination2origin, setDestination2origin] = useState([]);
 
+  const [areSameStations, setAreSameStations] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [lastUpdateTime, setLastUpdateTime] = useState(moment().format('HH:mm:ss'));
+
   // CHEERIO - start
   const getStationsId = async () => {
     const response = await axios.get('/stations', {
@@ -54,8 +59,8 @@ function App() {
     setStations(stations);
   };
 
-  const getRFI = async (stationId, destination) => {
-    const response = await axios.get(`/rfi/${stationId}`, {
+  const getRFI = async (origin, destination) => {
+    const response = await axios.get(`/rfi/${origin.id}`, {
       headers: {},
     });
 
@@ -65,6 +70,10 @@ function App() {
     // Use Cheerio to parse the HTML
     const $ = cheerio.load(html);
     // get all options with value attribute
+
+    let company = $('td#RVettore > img').map((i, el) => {
+      return $(el).attr('alt');
+    }).toArray();
 
     let numbers = $('td#RTreno').map((i, el) => {
       return $(el).text().replace(' ', '');
@@ -86,10 +95,11 @@ function App() {
       return $(el).attr('aria-label');
     }).toArray();
 
-    let moreInfo = $('.FermateSuccessivePopupStyle > .testoinfoaggiuntive').map((i, el) => {
-      return $(el).text();
+    let moreInfo = $('.FermateSuccessivePopupStyle').map((i, el) => {
+      return $(el).find('.testoinfoaggiuntive').first().text();
     }).toArray();
 
+    company = cleanArray(company);
     numbers = cleanArray(numbers);
     plannedTimes = cleanArray(plannedTimes);
     delays = cleanArray(delays);
@@ -97,15 +107,26 @@ function App() {
     blinking = cleanArray(blinking);
     moreInfo = cleanArray(moreInfo);
 
+    // print every array length
+    console.log(`company: ${company.length}`);
+    console.log(`numbers: ${numbers.length}`);
+    console.log(`plannedTimes: ${plannedTimes.length}`);
+    console.log(`delays: ${delays.length}`);
+    console.log(`platforms: ${platforms.length}`);
+    console.log(`blinking: ${blinking.length}`);
+    console.log(`moreInfo: ${moreInfo.length}`);
+
     // push each train data like an object to the array
     const trains = [];
+
     for (let i = 0; i < numbers.length; i++) {
       if (numbers[i] === '') continue;
 
       // filter only the trains that go to the destination
-      if (moreInfo[i] == null || !moreInfo[i].includes(`- ${destination} (`)) continue;
+      if (moreInfo[i] == null || !moreInfo[i].includes(`- ${destination.name} (`)) continue;
 
       trains.push({
+        company: company[i],
         number: numbers[i],
         plannedTime: plannedTimes[i],
         // if train is late, calculate the real time using moment.js
@@ -122,6 +143,16 @@ function App() {
   getStationsId(); // output: stations
   // CHEERIO - end
 
+  const getTrainSolutions = async () => {
+    const origin2destination = await getRFI(origin, destination);
+    const destination2origin = await getRFI(destination, origin);
+
+    // if array has more than five elements, drop the rest
+    setOrigin2destination(origin2destination.slice(0, 4));
+    setDestination2origin(destination2origin.slice(0, 4));
+  };
+
+  // get the origin and destination from the local storage
   useEffect(() => {
     const savedOrigin = localStorage.getItem('origin');
     const savedDestination = localStorage.getItem('destination');
@@ -134,11 +165,6 @@ function App() {
     }
   }, []);
 
-  const getTrainSolutions = async () => {
-    setOrigin2destination(await getRFI(origin.id, destination.name));
-    setDestination2origin(await getRFI(destination.id, origin.name));
-  };
-
   // setting origin and destination stations based on inputs (adding id)
   useEffect(() => {
     if (!stations.length) return;
@@ -150,6 +176,7 @@ function App() {
     localStorage.setItem('origin', JSON.stringify(originStation));
     setOrigin(originStation);
   }, [inputOrigin]);
+
   useEffect(() => {
     if (!stations.length) return;
 
@@ -161,67 +188,105 @@ function App() {
     setDestination(destinationStation);
   }, [inputDestination]);
 
+  // get the train solutions when origin and destination are set
   useEffect(() => {
     if (origin.id == null || destination.id == null) return;
 
-    if (origin.id === destination.id) return;
+    if (origin.id === destination.id) {
+      setAreSameStations(true);
+      return;
+    } else {
+      setAreSameStations(false);
+    }
 
     getTrainSolutions();
+
+    setInterval(() => {
+      setLastUpdateTime(moment().format('HH:mm:ss'));
+      getTrainSolutions();
+    }, 30000);
   }, [origin, destination]);
 
   return (
     <>
-      <div>
-        <h1></h1>
-        <div>
-          <div>
-            <AutoComplete
-              popupClassName="certain-category-search-dropdown"
-              popupMatchSelectWidth={350}
-              style={{
-                width: 250,
-              }}
-              onChange={(value) => setInputOrigin(value)}
-              filterOption
-              options={stations.map(station => ({ value: station.name }))}
-              size="large"
-            >
-              <Input.Search size="large" placeholder={origin.id != null ? origin.name : "Origin station"} />
-            </AutoComplete>
-            {origin2destination.length > 0 && (
-              origin2destination.map(train => (
-                <div key={train.id}>
-                  {`${train.number}: ${train.plannedTime} ${train.delay ?? ''} @ ${train.platform}`}
-                </div>
-              ))
-            )}
-          </div>
-          <div>
-            <AutoComplete
-              popupClassName="certain-category-search-dropdown"
-              popupMatchSelectWidth={350}
-              style={{
-                width: 250,
-              }}
-              onChange={(value) => setInputDestination(value)}
-              filterOption
-              options={stations.map(station => ({ value: station.name }))}
-              size="large"
-            >
-              <Input.Search size="large" placeholder={destination.id != null ? destination.name : "Destination station"} />
-            </AutoComplete>
-            {destination2origin.length > 0 && (
-              destination2origin.map(train => (
-                <div key={train.id}>
-                  {`${train.number}: ${train.plannedTime} ${train.delay ?? ''} @ ${train.platform}`}
-                </div>
-              ))
-            )}
-          </div>
+      <div className="info header">
+        {`The page refreshes automatically (updated at: ${lastUpdateTime})`}
+      </div>
+      <div className="info footer">
+        {`The data is provided by RFI`}
+      </div>
+      <div className='stationContainer'>
+        <div className="stationHeaderWrapper">
+          <h2>{origin.id != null ? origin.name : ''}</h2>
+          <AutoComplete
+            popupClassName="certain-category-search-dropdown"
+            popupMatchSelectWidth={350}
+            style={{
+              width: 250,
+            }}
+            onChange={(value) => setInputOrigin(value)}
+            filterOption
+            options={stations.map(station => ({ value: station.name }))}
+            size="large"
+          >
+            <Input.Search size="large" placeholder={origin.id != null ? origin.name : "Origin station"} />
+          </AutoComplete>
         </div>
-      </div >
+        {
+          areSameStations ? (
+            <div className='sameStations'>
+              <h3>Origin and destination are the same</h3>
+            </div>
+          ) :
+            origin2destination.length > 0 ? (
+              origin2destination.map(train => (
+                <TrainStatus train={train} />
+              ))
+            ) : (
+              <div className='noSolutions'>
+                <h3>No trains were found</h3>
+              </div>
+            )
+        }
+      </div>
+      <div className="separator" />
+      <div className='stationContainer'>
+        <div className="stationHeaderWrapper">
+          <h2>{destination.id != null ? destination.name : ''}</h2>
+          <AutoComplete
+            popupClassName="certain-category-search-dropdown"
+            popupMatchSelectWidth={350}
+            style={{
+              width: 250,
+            }}
+            onChange={(value) => setInputDestination(value)}
+            filterOption
+            options={stations.map(station => ({ value: station.name }))}
+            size="large"
+          >
+            <Input.Search size="large" placeholder={destination.id != null ? destination.name : "Destination station"} />
+          </AutoComplete>
+        </div>
+
+        {
+          areSameStations ? (
+            <div className='sameStations'>
+              <h3>Origin and destination are the same</h3>
+            </div>
+          ) :
+            destination2origin.length > 0 ? (
+              destination2origin.map(train => (
+                <TrainStatus train={train} />
+              ))
+            ) : (
+              <div className='noSolutions'>
+                <h3>No trains were found</h3>
+              </div>
+            )
+        }
+      </div>
     </>
   )
 }
 
-export default App
+export default App;

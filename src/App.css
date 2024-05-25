@@ -1,12 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Space+Grotesk&display=swap');
+
+:root {
+  --background: #1E1E1E;
+
+  --error: #FF6961;
+  --warning: #FDFD96;
+}
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  max-height: 95dvh;
+  width: 100vw;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: space-between;
+
+  padding-inline: 1rem;
+
+  background-color: var(--background);
+}
+
+.separator {
+  height: 1px;
+  width: 100%;
+
+  background-color: white;
+  opacity: 0.25;
+}
+
+.info {
+  position: absolute;
+  left: 0;
+  right: 0;
+
+  font-family: Nunito Sans;
+  font-size: .75rem;
+  color: white;
+  opacity: 0.25;
   text-align: center;
 }
 
-form {
+.header {
+  top: 0;
+  margin-block-start: 0.5rem;
+}
+
+.footer {
+  bottom: 0;
+  margin-block-end: 0.5rem;
+}
+
+.stationContainer {
+  min-height: 45dvh;
+  width: 100%;
+
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.stationHeaderWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  margin-block-end: 1.5rem;
+
+  h2 {
+    font-family: Nunito Sans;
+    font-size: 1.5rem;
+    font-weight: 700;
+    opacity: 0.75;
+  }
+}
+
+.sameStations {
+  font-family: Nunito Sans;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--error);
+  opacity: 0.75;
+  text-align: center;
+}
+
+.noSolutions {
+  font-family: Nunito Sans;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--error);
+  opacity: 0.75;
+  text-align: center;
+}
+
+/* editing ant design input to dark theme */
+.ant-input {
+  font-family: Nunito Sans !important;
+  color: white !important;
+  background-color: var(--background) !important;
+  border: 1px solid white !important;
+  border-radius: 200px 0px 0px 200px !important;
+}
+
+::placeholder {
+  font-family: Nunito Sans !important;
+  color: white !important;
+  opacity: 1; /* Firefox */
+}
+
+.ant-input-group-addon {
+  background-color: trasparent !important;
+  color: white !important;
+  border-radius: 0px 200px 200px 0px !important;
+}
+
+.ant-btn {
+  background-color: transparent !important;
+  color: white !important;
+  border-radius: 0px 200px 200px 0px !important;
 }
