@@ -68,7 +68,7 @@
   align-items: center;
   width: 100%;
 
-  padding-block: 1rem;
+  padding-block: .75rem;
 
   .titleWrapper {
     display: flex;

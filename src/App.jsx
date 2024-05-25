@@ -94,10 +94,6 @@ function App() {
       return $(el).text();
     }).toArray();
 
-    let blinking = $('td#RExLampeggio').map((i, el) => {
-      return $(el).attr('aria-label');
-    }).toArray();
-
     let moreInfo = $('.FermateSuccessivePopupStyle').map((i, el) => {
       return $(el).find('.testoinfoaggiuntive').first().text();
     }).toArray();
@@ -107,7 +103,6 @@ function App() {
     plannedTimes = cleanArray(plannedTimes);
     delays = cleanArray(delays);
     platforms = cleanArray(platforms);
-    blinking = cleanArray(blinking);
     moreInfo = cleanArray(moreInfo);
 
     // print every array length
@@ -116,7 +111,6 @@ function App() {
     console.log(`plannedTimes: ${plannedTimes.length}`);
     console.log(`delays: ${delays.length}`);
     console.log(`platforms: ${platforms.length}`);
-    console.log(`blinking: ${blinking.length}`);
     console.log(`moreInfo: ${moreInfo.length}`);
 
     // push each train data like an object to the array
@@ -125,8 +119,33 @@ function App() {
     for (let i = 0; i < numbers.length; i++) {
       if (numbers[i] === '') continue;
 
+      // if destination name is composed by more than one word, extract the first one and the last one in two different variables
+      const destinationNames = destination.name.split(' ');
+      const destinationName = destinationNames[0];
+      // get the last element 2 letters of the word
+      const destinationLastName = destinationNames[destinationNames.length - 1].slice(-2);
+
+      // if is just one word regex has to verify if '- destination.name (' is in the string
+      const regexOneWord = new RegExp(`${destination.name} \\(`);
+      // if is more than one word regex has to verify if the string starts with '- destinationName' and finishes with 'destinationLastName (' is in the string with everything in the middle
+      const regex = new RegExp(`${destinationName}.*${destinationLastName} \\(`);
+
+
       // filter only the trains that go to the destination
-      if (moreInfo[i] == null || !moreInfo[i].includes(`- ${destination.name} (`)) continue;
+      if (moreInfo[i] == null) continue;
+
+      console.log(`regex: ${regex}`);
+      console.log(`number: ${numbers[i]}`);
+      console.log(`nextStops: ${moreInfo[i]}`);
+      // test on moreInfo[i] if the train goes to the destination
+      switch (destinationNames.length) {
+        case 1:
+          if (!regexOneWord.test(moreInfo[i])) continue;
+          break;
+        default:
+          if (!regex.test(moreInfo[i])) continue;
+          break;
+      }
 
       // if realTime is after now continue
       if (moment(plannedTimes[i], 'HH:mm').diff(moment(), 'minutes') < 0) continue;
@@ -139,7 +158,6 @@ function App() {
         realTime: delays[i] === '0' ? plannedTimes[i] : moment(plannedTimes[i], 'HH:mm').add(delays[i], 'minutes').format('HH:mm'),
         delay: delays[i],
         platform: platforms[i],
-        blinking: blinking[i] == null ? true : !blinking[i].includes('No'),
         nextStops: moreInfo[i]
       });
     }
