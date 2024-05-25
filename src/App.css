@@ -64,17 +64,34 @@
 .stationHeaderWrapper {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   width: 100%;
 
-  margin-block-end: 1.5rem;
+  padding-block: 1rem;
 
-  h2 {
-    font-family: Nunito Sans;
-    font-size: 1.5rem;
-    font-weight: 700;
-    opacity: 0.75;
+  .titleWrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+
+    h2 {
+      font-family: Nunito Sans;
+      font-size: 1.5rem;
+      font-weight: 700;
+      opacity: 0.75;
+    }
+
+    .clearButton {
+      font-family: Nunito Sans;
+      font-size: 1rem;
+      color: white;
+      opacity: 0.75;
+      text-decoration: underline;
+    }
   }
 }
 

@@ -34,8 +34,11 @@ function App() {
   const [destination2origin, setDestination2origin] = useState([]);
 
   const [areSameStations, setAreSameStations] = useState(false);
+  const [nosolutions, setNosolutions] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(moment().format('HH:mm:ss'));
+
+  const intervals = [];
 
   // CHEERIO - start
   const getStationsId = async () => {
@@ -125,6 +128,9 @@ function App() {
       // filter only the trains that go to the destination
       if (moreInfo[i] == null || !moreInfo[i].includes(`- ${destination.name} (`)) continue;
 
+      // if realTime is after now continue
+      if (moment(plannedTimes[i], 'HH:mm').diff(moment(), 'minutes') < 0) continue;
+
       trains.push({
         company: company[i],
         number: numbers[i],
@@ -133,7 +139,7 @@ function App() {
         realTime: delays[i] === '0' ? plannedTimes[i] : moment(plannedTimes[i], 'HH:mm').add(delays[i], 'minutes').format('HH:mm'),
         delay: delays[i],
         platform: platforms[i],
-        blinking: !blinking[i].includes('No'),
+        blinking: blinking[i] == null ? true : !blinking[i].includes('No'),
         nextStops: moreInfo[i]
       });
     }
@@ -190,7 +196,15 @@ function App() {
 
   // get the train solutions when origin and destination are set
   useEffect(() => {
-    if (origin.id == null || destination.id == null) return;
+    if (origin.id == null || destination.id == null) {
+      // clear the intervals
+      intervals.forEach(clearInterval);
+
+      // clear the arrays
+      setOrigin2destination([]);
+      setDestination2origin([]);
+      return;
+    }
 
     if (origin.id === destination.id) {
       setAreSameStations(true);
@@ -201,10 +215,10 @@ function App() {
 
     getTrainSolutions();
 
-    setInterval(() => {
+    intervals.push(setInterval(() => {
       setLastUpdateTime(moment().format('HH:mm:ss'));
       getTrainSolutions();
-    }, 30000);
+    }, 30000));
   }, [origin, destination]);
 
   return (
@@ -217,20 +231,36 @@ function App() {
       </div>
       <div className='stationContainer'>
         <div className="stationHeaderWrapper">
-          <h2>{origin.id != null ? origin.name : ''}</h2>
-          <AutoComplete
-            popupClassName="certain-category-search-dropdown"
-            popupMatchSelectWidth={350}
-            style={{
-              width: 250,
-            }}
-            onChange={(value) => setInputOrigin(value)}
-            filterOption
-            options={stations.map(station => ({ value: station.name }))}
-            size="large"
-          >
-            <Input.Search size="large" placeholder={origin.id != null ? origin.name : "Origin station"} />
-          </AutoComplete>
+          {
+            // if station is set show h2 with name, otherwise show search box
+            origin.id != null ?
+              (
+                <div className='titleWrapper'>
+                  <h2>{origin.name}</h2>
+                  <div className='clearButton' onClick={() => {
+                    // clear local storage
+                    localStorage.removeItem('origin');
+                    setOrigin(initStation());
+                  }}>
+                    Clear
+                  </div>
+                </div>
+              ) : (
+                <AutoComplete
+                  popupClassName="certain-category-search-dropdown"
+                  popupMatchSelectWidth={350}
+                  style={{
+                    opacity: 0.75,
+                    width: 250,
+                  }}
+                  onChange={(value) => setInputOrigin(value)}
+                  filterOption
+                  options={stations.map(station => ({ value: station.name }))}
+                >
+                  <Input.Search size="large" placeholder={origin.id != null ? origin.name : "Origin station"} />
+                </AutoComplete>
+              )
+          }
         </div>
         {
           areSameStations ? (
@@ -240,7 +270,7 @@ function App() {
           ) :
             origin2destination.length > 0 ? (
               origin2destination.map(train => (
-                <TrainStatus train={train} />
+                <TrainStatus key={train.number} train={train} />
               ))
             ) : (
               <div className='noSolutions'>
@@ -252,22 +282,37 @@ function App() {
       <div className="separator" />
       <div className='stationContainer'>
         <div className="stationHeaderWrapper">
-          <h2>{destination.id != null ? destination.name : ''}</h2>
-          <AutoComplete
-            popupClassName="certain-category-search-dropdown"
-            popupMatchSelectWidth={350}
-            style={{
-              width: 250,
-            }}
-            onChange={(value) => setInputDestination(value)}
-            filterOption
-            options={stations.map(station => ({ value: station.name }))}
-            size="large"
-          >
-            <Input.Search size="large" placeholder={destination.id != null ? destination.name : "Destination station"} />
-          </AutoComplete>
+          {
+            // if station is set show h2 with name, otherwise show search box
+            destination.id != null ?
+              (
+                <div className='titleWrapper'>
+                  <h2>{destination.name}</h2>
+                  <div className='clearButton' onClick={() => {
+                    // clear local storage
+                    localStorage.removeItem('destination');
+                    setDestination(initStation());
+                  }}>
+                    Clear
+                  </div>
+                </div>
+              ) : (
+                <AutoComplete
+                  popupClassName="certain-category-search-dropdown"
+                  popupMatchSelectWidth={350}
+                  style={{
+                    opacity: 0.75,
+                    width: 250,
+                  }}
+                  onChange={(value) => setInputDestination(value)}
+                  filterOption
+                  options={stations.map(station => ({ value: station.name }))}
+                >
+                  <Input.Search size="large" placeholder={destination.id != null ? destination.name : "Destination station"} />
+                </AutoComplete>
+              )
+          }
         </div>
-
         {
           areSameStations ? (
             <div className='sameStations'>
@@ -276,7 +321,7 @@ function App() {
           ) :
             destination2origin.length > 0 ? (
               destination2origin.map(train => (
-                <TrainStatus train={train} />
+                <TrainStatus key={train.number} train={train} />
               ))
             ) : (
               <div className='noSolutions'>
