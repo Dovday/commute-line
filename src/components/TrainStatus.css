@@ -1,0 +1,123 @@
+:root {
+  --red: #FF6961;
+  --yellow: #FDFD96;
+  --green: #77DD77;
+  --text-dark: #1E1E1E;
+}
+
+.trainWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  min-width: 85dvw;
+
+  margin-block-end: .5rem;
+}
+
+.missingTimeBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  line-height: 1.25;
+
+  border-radius: 8px;
+  color: var(--text-dark);
+
+  padding: 1rem;
+  margin-inline-end: 1.5rem;
+
+  width: min(6vw, 6vh);
+  height: min(6vw, 6vh);
+
+  aspect-ratio: 1 / 1; /* Ensures the box remains a square */
+}
+
+.bg-trasparent {
+  background-color: transparent;
+}
+
+.bg-red {
+  background-color: var(--red);
+}
+
+.bg-yellow {
+  background-color: var(--yellow);
+}
+
+.bg-green {
+  background-color: var(--green);
+}
+
+.missingMinutes {
+  font-family: Nunito Sans;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.plannedTime {
+  font-family: Nunito Sans;
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  letter-spacing: 0.1rem;
+}
+
+.platform {
+  font-family: Nunito Sans;
+  font-size: 1.33rem;
+  font-weight: 600;
+  opacity: 0.5;
+}
+
+.textWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+}
+
+.trainName {
+  font-family: Nunito Sans;
+  font-size: 1.33rem;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.blinking {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.circle {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background-color: white;
+  opacity: 0.5;
+  margin-inline: 0.25rem;
+  animation: blink 1s infinite;
+}
+
+.st {
+  animation-delay: 0s;
+}
+
+.nd {
+  animation-delay: 0.5s;
+}
