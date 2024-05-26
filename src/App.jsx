@@ -21,6 +21,8 @@ const cleanArray = (array) => {
 };
 // UTILS - end
 
+const intervals = [];
+
 function App() {
   const [stations, setStations] = useState([]);
 
@@ -38,8 +40,6 @@ function App() {
   const [nosolutions, setNosolutions] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(moment().format('HH:mm:ss'));
-
-  const intervals = [];
 
   // CHEERIO - start
   const getStationsId = async () => {
