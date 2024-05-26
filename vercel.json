@@ -5,8 +5,8 @@
       "destination": "https://iechub.rfi.it/ArriviPartenze/ArrivalsDepartures/Monitor?arrivals=False&placeId=:id"
     },
     {
-      "source": "/stations/(.*)",
-      "destination": "https://iechub.rfi.it/ArriviPartenze/ArrivalsDepartures/$1"
+      "source": "/stations",
+      "destination": "https://iechub.rfi.it/ArriviPartenze/ArrivalsDepartures"
     }
   ]
 }
