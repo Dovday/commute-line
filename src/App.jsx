@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio';
 import axios from 'axios';
 import moment from 'moment';
 import { AutoComplete, Input } from 'antd';
+import { MailOutlined } from '@ant-design/icons';
 import TrainStatus from './components/TrainStatus';
 import './App.css';
 
@@ -183,8 +184,11 @@ function App() {
 
     console.log(`💾 ${savedOrigin}, ${savedDestination}`);
 
-    if (savedOrigin != null && savedDestination != null) {
+    if (savedOrigin != null) {
       setOrigin(JSON.parse(savedOrigin));
+    }
+
+    if (savedDestination != null) {
       setDestination(JSON.parse(savedDestination));
     }
   }, []);
@@ -241,6 +245,11 @@ function App() {
 
   return (
     <>
+      <div className="contactMe">
+        <a href="mailto:dvdcarlomagno@gmail.com">
+          Contact me
+        </a>
+      </div>
       <div className="info header">
         {`The page refreshes automatically (updated at: ${lastUpdateTime})`}
       </div>
@@ -266,7 +275,7 @@ function App() {
               ) : (
                 <AutoComplete
                   popupClassName="certain-category-search-dropdown"
-                  popupMatchSelectWidth={350}
+                  popupMatchSelectWidth={300}
                   style={{
                     opacity: 0.75,
                     width: 250,
@@ -317,7 +326,7 @@ function App() {
               ) : (
                 <AutoComplete
                   popupClassName="certain-category-search-dropdown"
-                  popupMatchSelectWidth={350}
+                  popupMatchSelectWidth={300}
                   style={{
                     opacity: 0.75,
                     width: 250,

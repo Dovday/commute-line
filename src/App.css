@@ -2,6 +2,7 @@
 
 :root {
   --background: #1E1E1E;
+  --bg-contact: #945968;
 
   --error: #FF6961;
   --warning: #FDFD96;
@@ -27,6 +28,39 @@
 
   background-color: white;
   opacity: 0.25;
+}
+
+.contactMe {
+  position: absolute;
+
+  top: 75%;
+  transform: translateY(-50%);
+  right: 0;
+
+  z-index: 9;
+
+  border-radius: 8px 0px 0px 8px;
+
+  background-color: var(--bg-contact);
+
+  /* shadow */
+  box-shadow: 0px 0px 4px 0px rgba(255, 255, 255, 0.25);
+
+  a {
+    font-family: Nunito Sans !important;
+    font-size: 1rem !important;
+    color: white !important;
+    opacity: 0.75 !important;
+    text-align: center !important;
+
+    text-decoration: none !important;
+
+    writing-mode: vertical-rl !important; /* Use vertical-rl for bottom to top */
+    transform: rotate(180deg); /* Rotate to make text bottom-to-top */
+    display: inline-block; /* Ensure the element respects the writing-mode */
+
+    padding-inline: 0.75rem 1rem;
+  }
 }
 
 .info {

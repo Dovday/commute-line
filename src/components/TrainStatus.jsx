@@ -30,7 +30,7 @@ const renderMissingTime = (missingTime) => {
 
 const TrainStatus = ({ train }) => {
 
-  let missingTime = moment(train.realTime, 'HH:mm').diff(moment(), 'minutes'); np
+  let missingTime = moment(train.realTime, 'HH:mm').diff(moment(), 'minutes');
 
   if (missingTime < 0) return;
 
