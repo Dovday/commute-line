@@ -9,8 +9,8 @@
 }
 
 #root {
-  max-height: 95dvh;
-  width: 100vw;
+  max-height: 95%;
+  width: 100%;
 
   display: flex;
   flex-direction: column;

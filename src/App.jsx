@@ -107,12 +107,12 @@ function App() {
     moreInfo = cleanArray(moreInfo);
 
     // print every array length
-    console.log(`company: ${company.length}`);
-    console.log(`numbers: ${numbers.length}`);
-    console.log(`plannedTimes: ${plannedTimes.length}`);
-    console.log(`delays: ${delays.length}`);
-    console.log(`platforms: ${platforms.length}`);
-    console.log(`moreInfo: ${moreInfo.length}`);
+    // console.log(`company: ${company.length}`);
+    // console.log(`numbers: ${numbers.length}`);
+    // console.log(`plannedTimes: ${plannedTimes.length}`);
+    // console.log(`delays: ${delays.length}`);
+    // console.log(`platforms: ${platforms.length}`);
+    // console.log(`moreInfo: ${moreInfo.length}`);
 
     // push each train data like an object to the array
     const trains = [];
@@ -135,9 +135,9 @@ function App() {
       // filter only the trains that go to the destination
       if (moreInfo[i] == null) continue;
 
-      console.log(`regex: ${regex}`);
-      console.log(`number: ${numbers[i]}`);
-      console.log(`nextStops: ${moreInfo[i]}`);
+      // console.log(`regex: ${regex}`);
+      // console.log(`number: ${numbers[i]}`);
+      // console.log(`nextStops: ${moreInfo[i]}`);
       // test on moreInfo[i] if the train goes to the destination
       switch (destinationNames.length) {
         case 1:
