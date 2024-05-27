@@ -108,11 +108,6 @@ function App() {
 
     // print every array length
     // console.log(`company: ${company.length}`);
-    // console.log(`numbers: ${numbers.length}`);
-    // console.log(`plannedTimes: ${plannedTimes.length}`);
-    // console.log(`delays: ${delays.length}`);
-    // console.log(`platforms: ${platforms.length}`);
-    // console.log(`moreInfo: ${moreInfo.length}`);
 
     // push each train data like an object to the array
     const trains = [];
@@ -252,9 +247,6 @@ function App() {
       </div>
       <div className="info header">
         {`The page refreshes automatically (updated at: ${lastUpdateTime})`}
-      </div>
-      <div className="info footer">
-        {`The data is provided by RFI`}
       </div>
       <div className='stationContainer'>
         <div className="stationHeaderWrapper">
