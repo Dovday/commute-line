@@ -9,7 +9,8 @@
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  min-width: 85dvw;
+  min-width: 50vw;
+  max-width: 85vw;
 
   margin-block-end: .5rem;
 }
@@ -28,8 +29,8 @@
   padding: 1rem;
   margin-inline-end: 1.5rem;
 
-  width: min(6vw, 6vh);
-  height: min(6vw, 6vh);
+  width: min(5vw, 5vh);
+  height: min(5vw, 5vh);
 
   aspect-ratio: 1 / 1; /* Ensures the box remains a square */
 }
@@ -66,7 +67,7 @@
 
 .platform {
   font-family: Nunito Sans;
-  font-size: 1.33rem;
+  font-size: 1rem;
   font-weight: 600;
   opacity: 0.5;
 }
@@ -80,7 +81,7 @@
 
 .trainName {
   font-family: Nunito Sans;
-  font-size: 1.33rem;
+  font-size: 1.25rem;
   font-weight: 700;
   opacity: 0.75;
 }

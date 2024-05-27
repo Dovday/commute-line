@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 import moment from 'moment';
-import { AutoComplete, Input } from 'antd';
-import { MailOutlined } from '@ant-design/icons';
+import { AutoComplete, Input, Skeleton } from 'antd';
 import TrainStatus from './components/TrainStatus';
 import './App.css';
 
@@ -38,7 +37,7 @@ function App() {
 
   const [areSameStations, setAreSameStations] = useState(false);
   const [nosolutions, setNosolutions] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [lastUpdateTime, setLastUpdateTime] = useState(moment().format('HH:mm:ss'));
 
   // CHEERIO - start
@@ -167,6 +166,7 @@ function App() {
     const origin2destination = await getRFI(origin, destination);
     const destination2origin = await getRFI(destination, origin);
 
+    setIsLoading(false);
     // if array has more than five elements, drop the rest
     setOrigin2destination(origin2destination.slice(0, 4));
     setDestination2origin(destination2origin.slice(0, 4));
@@ -230,6 +230,7 @@ function App() {
       setAreSameStations(false);
     }
 
+    setIsLoading(true);
     getTrainSolutions();
 
     intervals.push(setInterval(() => {
@@ -249,6 +250,7 @@ function App() {
         {`The page refreshes automatically (updated at: ${lastUpdateTime})`}
       </div>
       <div className='stationContainer'>
+        <Skeleton.Button active type='button' className='skeleton'/>
         <div className="stationHeaderWrapper">
           {
             // if station is set show h2 with name, otherwise show search box
@@ -291,7 +293,10 @@ function App() {
               origin2destination.map(train => (
                 <TrainStatus key={train.number} train={train} />
               ))
-            ) : (
+            ) :
+            (isLoading && (origin.id != null && destination.id != null)) ? (
+                <Skeleton.Button active type="button" />
+              ) : (
               <div className='noSolutions'>
                 <h3>No trains were found</h3>
               </div>
@@ -332,6 +337,7 @@ function App() {
               )
           }
         </div>
+
         {
           areSameStations ? (
             <div className='sameStations'>
@@ -342,11 +348,16 @@ function App() {
               destination2origin.map(train => (
                 <TrainStatus key={train.number} train={train} />
               ))
-            ) : (
-              <div className='noSolutions'>
-                <h3>No trains were found</h3>
+            ) :
+            (isLoading && (origin.id != null && destination.id != null)) ? (
+              <div>
+                Loading...
               </div>
-            )
+            ) : (
+            <div className='noSolutions'>
+              <h3>No trains were found</h3>
+            </div>
+          )
         }
       </div>
     </>
