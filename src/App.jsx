@@ -250,7 +250,6 @@ function App() {
         {`The page refreshes automatically (updated at: ${lastUpdateTime})`}
       </div>
       <div className='stationContainer'>
-        <Skeleton.Button active type='button' className='skeleton'/>
         <div className="stationHeaderWrapper">
           {
             // if station is set show h2 with name, otherwise show search box
@@ -294,13 +293,15 @@ function App() {
                 <TrainStatus key={train.number} train={train} />
               ))
             ) :
-            (isLoading && (origin.id != null && destination.id != null)) ? (
-                <Skeleton.Button active type="button" />
+              (isLoading && (origin.id != null && destination.id != null)) ? (
+                <div className="loading">
+                  Loading...
+                </div>
               ) : (
-              <div className='noSolutions'>
-                <h3>No trains were found</h3>
-              </div>
-            )
+                <div className='noSolutions'>
+                  <h3>No trains were found</h3>
+                </div>
+              )
         }
       </div>
       <div className="separator" />
@@ -349,15 +350,15 @@ function App() {
                 <TrainStatus key={train.number} train={train} />
               ))
             ) :
-            (isLoading && (origin.id != null && destination.id != null)) ? (
-              <div>
-                Loading...
-              </div>
-            ) : (
-            <div className='noSolutions'>
-              <h3>No trains were found</h3>
-            </div>
-          )
+              (isLoading && (origin.id != null && destination.id != null)) ? (
+                <div>
+                  Loading...
+                </div>
+              ) : (
+                <div className='noSolutions'>
+                  <h3>No trains were found</h3>
+                </div>
+              )
         }
       </div>
     </>

@@ -51,7 +51,7 @@ const TrainStatus = ({ train }) => {
             (
               <>
                 <div className='missingMinutes'>{renderMissingTime(missingTime)}</div>
-                {/* <div className='plannedTime'>{train.plannedTime}</div>\ */}
+                <div className='realTime'>{train.realTime}</div>
               </>
             )
         }
