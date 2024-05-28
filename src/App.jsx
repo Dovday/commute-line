@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import * as cheerio from 'cheerio';
 import axios from 'axios';
 import moment from 'moment';
-import { AutoComplete, Input, Skeleton } from 'antd';
+import { AutoComplete, Input } from 'antd';
 import TrainStatus from './components/TrainStatus';
 import './App.css';
 
@@ -36,7 +36,6 @@ function App() {
   const [destination2origin, setDestination2origin] = useState([]);
 
   const [areSameStations, setAreSameStations] = useState(false);
-  const [nosolutions, setNosolutions] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdateTime, setLastUpdateTime] = useState(moment().format('HH:mm:ss'));
 
@@ -105,9 +104,6 @@ function App() {
     platforms = cleanArray(platforms);
     moreInfo = cleanArray(moreInfo);
 
-    // print every array length
-    // console.log(`company: ${company.length}`);
-
     // push each train data like an object to the array
     const trains = [];
 
@@ -129,9 +125,11 @@ function App() {
       // filter only the trains that go to the destination
       if (moreInfo[i] == null) continue;
 
-      // console.log(`regex: ${regex}`);
-      // console.log(`number: ${numbers[i]}`);
-      // console.log(`nextStops: ${moreInfo[i]}`);
+      console.log('case: ', destinationNames.length);
+      console.log(`regexOneWord: ${regexOneWord}`);
+      console.log(`regex: ${regex}`);
+      console.log(`number: ${numbers[i]}`);
+      console.log(`nextStops: ${moreInfo[i]}`);
       // test on moreInfo[i] if the train goes to the destination
       switch (destinationNames.length) {
         case 1:
@@ -162,7 +160,39 @@ function App() {
   getStationsId(); // output: stations
   // CHEERIO - end
 
+  // const getViaggioTrenoSolutions = async (origin, destination) => {
+  //   const responseOrigin = await axios.get(`/autocomplete/${origin.name}`);
+  //   const responseDestination = await axios.get(`/autocomplete/${destination.name}`);
+
+  //   // split the response by new line
+  //   const matchingListOrigin = responseOrigin.data.split('\n').filter((el) => el !== '');
+  //   const bestMatchOrigin = matchingListOrigin[0];
+
+  //   const matchingListDestination = responseDestination.data.split('\n').filter((el) => el !== '');
+  //   const bestMatchDestination = matchingListDestination[0];
+
+  //   // format of station: <station_name>|S0<code>
+  //   const longCodeOrigin = bestMatchOrigin.split('|')[1];
+  //   const codeOrigin = longCodeOrigin.slice(2, longCodeOrigin.length);
+
+  //   const longCodeDestination = bestMatchDestination.split('|')[1];
+  //   const codeDestination = longCodeDestination.slice(2, longCodeDestination.length);
+
+  //   // print everything
+  //   console.log(`🚉 ${origin.name} -> ${bestMatchOrigin} -> ${codeOrigin}`);
+  //   console.log(`🚉 ${destination.name} -> ${bestMatchDestination} -> ${codeDestination}`);
+
+  //   // solutions/originCode/destinationCode/YYYY-MM-DDTHH:mm:ss
+  //   const response = await axios.get(`/solutions/${codeOrigin}/${codeDestination}/${moment().format('YYYY-MM-DDTHH:mm:ss')}`);
+  //   console.log(response.data);
+
+  //   return response.data.vehicles.map((vehicle) => vehicle.numeroTreno);
+  // };
+
   const getTrainSolutions = async () => {
+    // console.log(getViaggioTrenoSolutions(origin, destination));
+    // getViaggioTrenoSolutions(origin, destination);
+
     const origin2destination = await getRFI(origin, destination);
     const destination2origin = await getRFI(destination, origin);
 
@@ -282,6 +312,7 @@ function App() {
               )
           }
         </div>
+        <div className="trainsContainer">
         {
           areSameStations ? (
             <div className='sameStations'>
@@ -303,6 +334,7 @@ function App() {
                 </div>
               )
         }
+        </div>
       </div>
       <div className="separator" />
       <div className='stationContainer'>
@@ -337,8 +369,9 @@ function App() {
                 </AutoComplete>
               )
           }
+          </div>
         </div>
-
+          <div className="trainsContainer">
         {
           areSameStations ? (
             <div className='sameStations'>
