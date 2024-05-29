@@ -157,6 +157,12 @@
   text-align: center;
 }
 
+.loading {
+  width: 100%;
+
+  text-align: center;
+}
+
 /* editing ant design input to dark theme */
 .ant-input {
   font-family: Nunito Sans !important;
