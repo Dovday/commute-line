@@ -66,9 +66,6 @@ function App() {
   };
 
   const getRFI = async (origin, destination) => {
-    console.log('---------------')
-    console.log(origin);
-    console.log('---------------')
     const response = await axios.get(`/rfi/${origin.id}`, {
       headers: {},
     });
@@ -88,7 +85,13 @@ function App() {
 
     let numbers = $("td#RTreno")
       .map((i, el) => {
-        return $(el).text().replace(" ", "");
+        return $(el).text();
+      })
+      .toArray();
+
+      let finalStations = $("td#RStazione > div")
+      .map((i, el) => {
+        return $(el).text();
       })
       .toArray();
 
@@ -110,28 +113,28 @@ function App() {
       })
       .toArray();
 
-    let moreInfo = $(".FermateSuccessivePopupStyle")
-      .map((i, el) => {
-        return $(el).find(".testoinfoaggiuntive").first().text();
-      })
-      .toArray();
+    let moreInfo = $("td#RDettagli");
 
     company = cleanArray(company);
     numbers = cleanArray(numbers);
+    finalStations = cleanArray(finalStations);
     plannedTimes = cleanArray(plannedTimes);
     delays = cleanArray(delays);
     platforms = cleanArray(platforms);
-    moreInfo = cleanArray(moreInfo);
 
     // push each train data like an object to the array
     const trains = [];
 
     for (let i = 0; i < numbers.length; i++) {
       // print everything of the train
-      console.log(`🚂 ${company[i]} ${numbers[i]} ${plannedTimes[i]} ${delays[i]} ${platforms[i]} ${moreInfo[i]}`);
-
+      // console.log(`🚂 ${company[i]} ${numbers[i]} ${plannedTimes[i]} ${delays[i]} ${platforms[i]} ${moreInfo[i]}`);
 
       if (numbers[i] === "") continue;
+
+      let nextStops = $(moreInfo[i]).find(".FermateSuccessivePopupStyle").find(".testoinfoaggiuntive").first().text().replace(/\n/g, "").trim();
+
+      // push destination name to the array
+      nextStops += ('- ' + finalStations[i]);
 
       // if destination name is composed by more than one word, extract the first one and the last one in two different variables
       const destinationNames = destination.name.split(" ");
@@ -142,21 +145,13 @@ function App() {
       // if is more than one word regex has to verify if the string starts with '- destinationName' and finishes with 'destinationLastName (' is in the string with everything in the middle
       const regex = new RegExp(`- ${destinationName}`);
 
-      // filter only the trains that go to the destination
-      if (moreInfo[i] == null) continue;
-
-      // console.log("case: ", destinationNames.length);
-      // console.log(`regexOneWord: ${regexOneWord}`);
-      // console.log(`regex: ${regex}`);
-      // console.log(`number: ${numbers[i]}`);
-      // console.log(`nextStops: ${moreInfo[i]}`);
-      // test on moreInfo[i] if the train goes to the destination
+      // test on nextStops if the train goes to the destination
       switch (destinationNames.length) {
         case 1:
-          if (!regexOneWord.test(moreInfo[i])) continue;
+          if (!regexOneWord.test(nextStops)) continue;
           break;
         default:
-          if (!regex.test(moreInfo[i])) continue;
+          if (!regex.test(nextStops)) continue;
           break;
       }
 
@@ -165,6 +160,7 @@ function App() {
         continue;
 
       trains.push({
+        cancelled: delays[i] === "Cancellato",
         company: company[i],
         number: numbers[i],
         plannedTime: plannedTimes[i],
@@ -177,7 +173,7 @@ function App() {
                 .format("HH:mm"),
         delay: delays[i],
         platform: platforms[i],
-        nextStops: moreInfo[i],
+        nextStops: nextStops,
       });
     }
     return trains;

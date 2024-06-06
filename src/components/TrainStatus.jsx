@@ -2,8 +2,10 @@ import moment from 'moment';
 import './TrainStatus.css';
 
 // based on the missingTime, return the color of the box
-const getBoxColor = (missingTime) => {
-  if (missingTime === 0) {
+const getBoxColor = (missingTime, isCancelled) => {
+  if (isCancelled) {
+    return 'cancelled';
+  } else if (missingTime === 0) {
     return 'trasparent';
   } else if (missingTime <= 10) {
     return 'red';
@@ -31,12 +33,10 @@ const TrainStatus = ({ train }) => {
 
   let missingTime = moment(train.realTime, 'HH:mm').diff(moment(), 'minutes');
 
-  if (missingTime < 0) return;
-
   return (
-    <div key={train.id} className='trainWrapper'>
+    <div key={train.id} className={`trainWrapper ${train.cancelled ? 'cancelled' : ''}`}>
       {/* blinking animatino if train is leaving */}
-      <div className={`missingTimeBox bg-${getBoxColor(missingTime)}`}>
+      <div className={`missingTimeBox bg-${getBoxColor(missingTime, train.cancelled)}`}>
         {
           missingTime === 0 ?
             // animation for the train that is leaving
@@ -57,7 +57,7 @@ const TrainStatus = ({ train }) => {
       </div>
       <div className="textWrapper">
         <div className="platform">
-          {`Platform ${train.platform}`}
+          {train.cancelled ? 'CANCELLED' : `Platform ${train.platform}`}
         </div>
         <div className="trainName">
           {`${train.company} ${train.number}`}

@@ -14,6 +14,17 @@
   margin-block-end: .5rem;
 }
 
+.cancelled {
+  filter: saturate(0);
+  opacity: 0.5;
+}
+
+.cancelled {
+  .missingTimeBox {
+    text-decoration: line-through;
+  }
+}
+
 .missingTimeBox {
   display: flex;
   flex-direction: column;
@@ -32,6 +43,10 @@
   height: min(5vw, 5vh);
 
   aspect-ratio: 1 / 1; /* Ensures the box remains a square */
+}
+
+.bg-cancelled {
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .bg-trasparent {
