@@ -66,6 +66,9 @@ function App() {
   };
 
   const getRFI = async (origin, destination) => {
+    console.log('-----------');
+    console.log(origin.name);
+    console.log('-----------');
     const response = await axios.get(`/rfi/${origin.id}`, {
       headers: {},
     });
@@ -126,8 +129,6 @@ function App() {
     const trains = [];
 
     for (let i = 0; i < numbers.length; i++) {
-      // print everything of the train
-      // console.log(`🚂 ${company[i]} ${numbers[i]} ${plannedTimes[i]} ${delays[i]} ${platforms[i]} ${moreInfo[i]}`);
 
       if (numbers[i] === "") continue;
 
@@ -135,6 +136,7 @@ function App() {
 
       // push destination name to the array
       nextStops += ('- ' + finalStations[i]);
+
 
       // if destination name is composed by more than one word, extract the first one and the last one in two different variables
       const destinationNames = destination.name.split(" ");
@@ -150,27 +152,27 @@ function App() {
         case 1:
           if (!regexOneWord.test(nextStops)) continue;
           break;
-        default:
-          if (!regex.test(nextStops)) continue;
-          break;
-      }
+          default:
+            if (!regex.test(nextStops)) continue;
+            break;
+          }
+          // print everything of the train
+          console.log(`🚂 ${company[i]} ${numbers[i]} ${plannedTimes[i]} ${delays[i]} ${platforms[i]} ${nextStops}`);
 
-      // if realTime is after now continue
-      if (moment(plannedTimes[i], "HH:mm").diff(moment(), "minutes") < 0)
-        continue;
 
-      trains.push({
-        cancelled: delays[i] === "Cancellato",
-        company: company[i],
+          // actualTime = plannedTime + delay
+          const actualTime = moment(plannedTimes[i], "HH:mm").add(delays[i], "minutes").format("HH:mm");
+          // if actualTime is after now continue
+          if (moment(actualTime).diff(moment(), "minutes") < 0)
+            continue;
+
+          trains.push({
+            cancelled: delays[i] === "Cancellato",
+            company: company[i],
         number: numbers[i],
         plannedTime: plannedTimes[i],
         // if train is late, calculate the real time using moment.js
-        realTime:
-          delays[i] === "0"
-            ? plannedTimes[i]
-            : moment(plannedTimes[i], "HH:mm")
-                .add(delays[i], "minutes")
-                .format("HH:mm"),
+        realTime: actualTime,
         delay: delays[i],
         platform: platforms[i],
         nextStops: nextStops,
@@ -182,39 +184,7 @@ function App() {
   getStationsId(); // output: stations
   // CHEERIO - end
 
-  // const getViaggioTrenoSolutions = async (origin, destination) => {
-  //   const responseOrigin = await axios.get(`/autocomplete/${origin.name}`);
-  //   const responseDestination = await axios.get(`/autocomplete/${destination.name}`);
-
-  //   // split the response by new line
-  //   const matchingListOrigin = responseOrigin.data.split('\n').filter((el) => el !== '');
-  //   const bestMatchOrigin = matchingListOrigin[0];
-
-  //   const matchingListDestination = responseDestination.data.split('\n').filter((el) => el !== '');
-  //   const bestMatchDestination = matchingListDestination[0];
-
-  //   // format of station: <station_name>|S0<code>
-  //   const longCodeOrigin = bestMatchOrigin.split('|')[1];
-  //   const codeOrigin = longCodeOrigin.slice(2, longCodeOrigin.length);
-
-  //   const longCodeDestination = bestMatchDestination.split('|')[1];
-  //   const codeDestination = longCodeDestination.slice(2, longCodeDestination.length);
-
-  //   // print everything
-  //   console.log(`🚉 ${origin.name} -> ${bestMatchOrigin} -> ${codeOrigin}`);
-  //   console.log(`🚉 ${destination.name} -> ${bestMatchDestination} -> ${codeDestination}`);
-
-  //   // solutions/originCode/destinationCode/YYYY-MM-DDTHH:mm:ss
-  //   const response = await axios.get(`/solutions/${codeOrigin}/${codeDestination}/${moment().format('YYYY-MM-DDTHH:mm:ss')}`);
-  //   console.log(response.data);
-
-  //   return response.data.vehicles.map((vehicle) => vehicle.numeroTreno);
-  // };
-
   const getTrainSolutions = async () => {
-    // console.log(getViaggioTrenoSolutions(origin, destination));
-    // getViaggioTrenoSolutions(origin, destination);
-
     const origin2destination = await getRFI(origin, destination);
     const destination2origin = await getRFI(destination, origin);
 
