@@ -143,7 +143,7 @@ function App() {
       let nextStops = $(moreInfo[i]).find(".FermateSuccessivePopupStyle").find(".testoinfoaggiuntive").first().text().replace(/\n/g, "").trim();
 
       // push destination name to the array
-      nextStops += ('- ' + finalStations[i]);
+      nextStops += ('' + finalStations[i]);
 
 
       // if destination name is composed by more than one word, extract the first one and the last one in two different variables
@@ -151,9 +151,9 @@ function App() {
       const destinationName = destinationNames[0];
 
       // if is just one word regex has to verify if '- destination.name (' is in the string
-      const regexOneWord = new RegExp(`- ${destination.name} \\(`);
+      const regexOneWord = new RegExp(`${destination.name}`);
       // if is more than one word regex has to verify if the string starts with '- destinationName' and finishes with 'destinationLastName (' is in the string with everything in the middle
-      const regex = new RegExp(`- ${destinationName}`);
+      const regex = new RegExp(`${destinationName}`);
 
       // test on nextStops if the train goes to the destination
       switch (destinationNames.length) {
@@ -164,6 +164,7 @@ function App() {
           if (!regex.test(nextStops)) continue;
           break;
       }
+
       // print everything of the train
       // console.log(`🚂 ${company[i]} ${numbers[i]} ${plannedTimes[i]} ${delays[i]} ${platforms[i]} ${nextStops}`);
 
@@ -295,7 +296,7 @@ function App() {
   return (
     <>
       <div className="contactMe">
-        <a href="mailto:dvdcarlomagno@gmail.com">Contact me</a>
+        <a href="https://linktr.ee/dvdcarlomagno">Contact me</a>
       </div>
       <div className="info header">
         {`The page refreshes automatically (updated at: ${lastUpdateTime})`}
