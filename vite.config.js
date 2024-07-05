@@ -5,16 +5,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      // '/autocomplete': {
-      //   target: 'http://www.viaggiatreno.it/infomobilita/resteasy/viaggiatreno/autocompletaStazione/',
-      //   changeOrigin: true,
-      //   rewrite: (path) => path.replace(/^\/autocomplete\/(.*)/, '$1'),
-      // },
-      // '/solutions': {
-      //   target: 'http://www.viaggiatreno.it/viaggiotrenonew/resteasy/viaggiotreno/soluzioniViaggioNew/',
-      //   changeOrigin: true,
-      //   rewrite: (path) => path.replace(/^\/solutions\/(.*)/, '$1'),
-      // },
       '/rfi': {
         target: 'https://iechub.rfi.it/ArriviPartenze/ArrivalsDepartures/Monitor',
         changeOrigin: true,
