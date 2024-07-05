@@ -178,6 +178,10 @@ function App() {
         nextStops: nextStops,
       });
     }
+
+    // sort trains by real time
+    trains.sort((a, b) => moment(a.realTime, 'HH:mm').diff(moment(b.realTime, 'HH:mm'), 'minutes'));
+
     return trains;
   };
 
